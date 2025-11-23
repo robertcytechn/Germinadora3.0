@@ -8,6 +8,7 @@
 #include <PINS.h>
 #include <VARS.h>
 // #include <CH375.h>  // Descomentar cuando se conecte el CH375B físicamente
+// #include <MENU.h>   // Descomentar cuando se conecte el Joystick ARD-358 físicamente
 
 // =================================================================
 //  OBJETOS GLOBALES
@@ -19,6 +20,9 @@ DHT dhtPuerta(DHT_PUERTA_PIN, DHT11);
 Adafruit_SSD1306 display(OLED_WIDTH, OLED_HEIGHT, &Wire, OLED_ADDR);
 
 // CH375 usbHost(Serial1, CH375_INT_PIN); // Descomentar cuando se conecte el CH375B
+
+// Sistema de Menú Interactivo (Descomentar cuando se conecte Joystick ARD-358)
+// MenuSystem menu(&display);
 
 // =================================================================
 //  PROTOTIPOS DE FUNCIONES
@@ -74,11 +78,17 @@ void setup() {
     // TODO: Descomentar cuando se conecte CH375B físicamente
     // inicializarUSB();
     
+    // TODO: Descomentar cuando se conecte Joystick ARD-358 físicamente
+    // menu.inicializar();
+    
     Serial.println(F("Sistema iniciado correctamente."));
     Serial.println(F("Configuracion: Drosera capensis"));
     Serial.print(F("Temp Dia: ")); Serial.print(tempDia); Serial.println(F("C"));
     Serial.print(F("Temp Noche: ")); Serial.print(tempNoche); Serial.println(F("C"));
     Serial.print(F("Humedad Objetivo: ")); Serial.print(humObjetivo); Serial.println(F("%"));
+    Serial.println(F(""));
+    Serial.println(F("IMPORTANTE: Calefaccion y ventilacion externa"));
+    Serial.println(F("se desactivan automaticamente durante la noche"));
 }
 
 // =================================================================
@@ -280,8 +290,22 @@ void controlLuces(){
 }
 
 void controlCalefactora(){
+    DateTime ahora = reloj.now();
+    int horaActual = ahora.hour();
+    
+    // NUEVO: Desactivar completamente durante el ciclo nocturno
+    // Solo opera durante el día (entre initDia y finDia)
+    if (horaActual < initDia || horaActual >= finDia) {
+        if (estatusResistencia) {
+            estatusResistencia = false;
+            digitalWrite(CALEFACTORA_PIN, LOW);
+            Serial.println(F("Calefaccion OFF - Ciclo nocturno"));
+        }
+        return; // No hacer nada durante la noche
+    }
+    
     // Determinar setpoint según hora del día
-    float target = (reloj.now().hour() >= initDia && reloj.now().hour() <= finDia) ? tempDia : tempNoche;
+    float target = (horaActual >= initDia && horaActual <= finDia) ? tempDia : tempNoche;
 
     // VERIFICACIÓN DE HUMEDAD ANTES DE CALENTAR (CRÍTICO para Drosera)
     // Si la humedad está por debajo del mínimo de seguridad, NO calentar
@@ -349,6 +373,22 @@ void controlVentilacionInterna(){
 }
 
 void controlVentilacionExterna(){
+    DateTime ahora = reloj.now();
+    int horaActual = ahora.hour();
+    
+    // NUEVO: Desactivar completamente durante el ciclo nocturno
+    // Solo opera durante el día (entre initDia y finDia)
+    if (horaActual < initDia || horaActual >= finDia) {
+        // Apagar ventilación externa durante la noche
+        if (potenciaVentiladorexterno != 0) {
+            analogWrite(VENTILADOR_PIN, 0);
+            potenciaVentiladorexterno = 0;
+            estadoVentExt = 0;
+            Serial.println(F("Ventilacion externa OFF - Ciclo nocturno"));
+        }
+        return; // No hacer nada durante la noche
+    }
+    
     // Máquina de Estados para ciclo optimizado para alta humedad
     // Estado 0: Basal (15% suave), Estado 1: Ráfaga (60% moderado), Estado 2: Descanso (0%)
     
@@ -391,6 +431,13 @@ void controlVentilacionExterna(){
 
 void mostrarPantalla(){
     static unsigned long ultimaActualizacion = 0;
+    
+    // TODO: Descomentar cuando se conecte Joystick ARD-358
+    // Si el menú está activo, no mostrar la pantalla principal
+    // if (menu.estaActivo()) {
+    //     menu.mostrar();
+    //     return;
+    // }
     
     // Actualizar pantalla solo cada TIEMPO_ACTUALIZACION_PANTALLA (no bloqueante)
     if (millis() - ultimaActualizacion < TIEMPO_ACTUALIZACION_PANTALLA) return;
@@ -624,12 +671,16 @@ void guardarDatosUSB() {
 void loop() {
     // Loop principal - SIN DELAYS (totalmente no bloqueante)
     
+    // TODO: Descomentar cuando se conecte Joystick ARD-358
+    // Actualizar sistema de menú (detecta activación y navegación)
+    // menu.actualizar();
+    
     leerTemperaturaHumedad();      // Actualiza solo si ha pasado el tiempo definido
     controlLuces();                 // Control de iluminación diurna/nocturna
-    controlCalefactora();           // Control térmico con verificación de humedad
+    controlCalefactora();           // Control térmico con verificación de humedad (SOLO DÍA)
     controlVentilacionInterna();    // Ventilación interna con ciclos
-    controlVentilacionExterna();    // Ventilación externa con estados
-    mostrarPantalla();              // Actualiza solo cada segundo
+    controlVentilacionExterna();    // Ventilación externa con estados (SOLO DÍA)
+    mostrarPantalla();              // Actualiza solo cada segundo (o muestra menú)
     verificarAlarmas();             // Sistema de seguridad y monitoreo
     
     // TODO: Descomentar cuando se conecten los dispositivos físicos

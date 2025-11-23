@@ -15,6 +15,8 @@ Controlador inteligente que mantiene condiciones óptimas para la germinación y
 - ✅ Ventilación inteligente anti-hongos
 - ✅ Sistema de alarmas de seguridad
 - ✅ Código completamente no bloqueante (sin delays)
+- ✅ **Desactivación automática de calefacción/ventilación durante la noche**
+- ✅ **Sistema de menú interactivo estilo Marlin con joystick (preparado)**
 - 🔜 Control de humedad con nebulizador (preparado)
 - 🔜 Logging de datos en USB cada 30 minutos (preparado)
 - 🔜 Alarmas audibles con buzzer (preparado)
@@ -45,6 +47,7 @@ Controlador inteligente que mantiene condiciones óptimas para la germinación y
 - Buzzer para alarmas (pin 11)
 - Módulo CH375B para USB Host (Serial1, pines 18/19)
 - Pendrive/USB para logging de datos
+- **Joystick ARD-358 para menú interactivo (A0, A1, pin 22)**
 
 ## 📦 Librerías Necesarias
 
@@ -80,6 +83,11 @@ LEDs Rojos:      Pin 9
 Humidificador:   Pin 10 (comentado)
 Buzzer:          Pin 11 (comentado)
 CH375 INT:       Pin 12
+
+// JOYSTICK ARD-358 (comentado)
+Joystick VRX:    Pin A0
+Joystick VRY:    Pin A1
+Joystick SW:     Pin 22
 
 // I2C (automático en Mega)
 SDA:             Pin 20
@@ -186,6 +194,21 @@ El sistema detecta y reporta automáticamente:
 
 ## 📝 Funciones Preparadas para Implementación
 
+### Sistema de Menú Interactivo (NUEVO)
+```cpp
+// En main.cpp, descomentar:
+#include <MENU.h>
+MenuSystem menu(&display);
+
+// En setup():
+menu.inicializar();
+
+// En loop():
+menu.actualizar();
+```
+
+Ver [Guía Completa del Menú](docs/MENU_GUIDE.md) para más detalles.
+
 ### Control de Humedad
 ```cpp
 // En loop(), descomentar cuando conectes el humidificador:
@@ -275,6 +298,15 @@ Jose Roberto Tamayo Montejano Cytechnologies
 Desarrollado para el cultivo óptimo de plantas carnívoras.
 
 ## 🔄 Changelog
+
+### v3.0 (Nov 2025) - NUEVO
+- ✅ **Desactivación automática de calefacción durante ciclo nocturno**
+- ✅ **Desactivación automática de ventilación externa durante ciclo nocturno**
+- ✅ **Sistema de menú interactivo estilo Marlin con Joystick ARD-358**
+- ✅ Navegación completa por menús en pantalla OLED
+- ✅ Edición de todos los parámetros en tiempo real
+- ✅ Sin necesidad de recompilar para cambiar valores
+- ✅ Archivo MENU.h completo y documentado
 
 ### v2.0 (Nov 2025)
 - ✅ Optimizado para Drosera capensis
