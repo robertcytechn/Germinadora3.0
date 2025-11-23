@@ -270,7 +270,8 @@ Cambiar la batería CR2032 del RTC cada 2-3 años.
 Este proyecto es de código abierto. Úsalo y modifícalo libremente.
 
 ## 👨‍💻 Autor
-
+Jose Roberto Tamayo Montejano Cytechnologies
+--- IGNORE ---
 Desarrollado para el cultivo óptimo de plantas carnívoras.
 
 ## 🔄 Changelog
