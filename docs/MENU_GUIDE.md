@@ -2,37 +2,51 @@
 
 ## 📋 Descripción
 
-Sistema de menús estilo Marlin Firmware que permite modificar todos los parámetros del sistema en tiempo real sin necesidad de recompilar el código. Navegación mediante Joystick ARD-358.
+Sistema de menús estilo Marlin Firmware que permite modificar todos los parámetros del sistema en tiempo real sin necesidad de recompilar el código. Navegación mediante 3 botones simples.
 
 ## 🕹️ Hardware Requerido
 
-### Joystick ARD-358
-- **Tipo:** Joystick analógico de 2 ejes + botón
+### Botones de Navegación
+- **Tipo:** 3 botones pulsadores normalmente abiertos (push buttons)
 - **Conexiones:**
-  - VCC → 5V
-  - GND → GND
-  - VRX (Eje X) → A0
-  - VRY (Eje Y) → A1
-  - SW (Botón) → Pin 22 (con pull-up interno)
+  - **Botón ARRIBA:**
+    - Terminal 1 → Pin 24
+    - Terminal 2 → GND
+  - **Botón ABAJO:**
+    - Terminal 1 → Pin 25
+    - Terminal 2 → GND
+  - **Botón ENTER/SELECT:**
+    - Terminal 1 → Pin 26
+    - Terminal 2 → GND
 
 ### Características
-- Rango analógico: 0-1023 (cada eje)
-- Botón tipo switch (activo en LOW)
-- Zona muerta configurable para evitar drift
+- No requiere resistencias externas (usa INPUT_PULLUP)
+- Anti-rebote por software (50ms)
+- Repetición automática al mantener presionado
+- Costo muy bajo (< $1 USD total)
 
 ## 🔧 Instalación
 
-### 1. Conexión del Joystick
+### 1. Conexión de los Botones
 
 ```
-Joystick ARD-358        Arduino Mega
+Botón ARRIBA            Arduino Mega
 ----------------        ------------
-    VCC         ------>    5V
-    GND         ------>    GND
-    VRX (X)     ------>    A0
-    VRY (Y)     ------>    A1
-    SW (Botón)  ------>    Pin 22
+  Terminal 1    ------>    Pin 24
+  Terminal 2    ------>    GND
+
+Botón ABAJO             Arduino Mega
+----------------        ------------
+  Terminal 1    ------>    Pin 25
+  Terminal 2    ------>    GND
+
+Botón ENTER             Arduino Mega
+----------------        ------------
+  Terminal 1    ------>    Pin 26
+  Terminal 2    ------>    GND
 ```
+
+**Nota:** No se necesitan resistencias pull-up externas porque el Arduino usa las resistencias internas.
 
 ### 2. Activación en el Código
 
@@ -68,7 +82,7 @@ pio run --target upload
 
 ### Activación del Menú
 
-**Mantener presionado el botón del joystick por 2 segundos**
+**Mantener presionado el botón ENTER por 2 segundos**
 
 El sistema cambiará de la pantalla de monitoreo al menú principal.
 
@@ -76,13 +90,29 @@ El sistema cambiará de la pantalla de monitoreo al menú principal.
 
 | Acción | Control |
 |--------|---------|
-| **Mover arriba** | Mover joystick hacia arriba (Y < 400) |
-| **Mover abajo** | Mover joystick hacia abajo (Y > 600) |
-| **Seleccionar** | Presionar botón del joystick |
+| **Mover arriba** | Presionar botón ARRIBA |
+| **Mover abajo** | Presionar botón ABAJO |
+| **Seleccionar/Confirmar** | Presionar botón ENTER |
 | **Volver** | Seleccionar opción "Volver" |
 | **Salir del menú** | Seleccionar "Salir" en menú principal |
 
 ### Edición de Valores
+
+Cuando seleccionas un parámetro para editar:
+
+1. **Presiona ENTER** sobre el parámetro que deseas cambiar
+2. El valor comenzará a parpadear o se destacará
+3. **Usa ARRIBA/ABAJO** para modificar el valor
+   - Presión corta: Cambio único
+   - Mantener presionado: Repetición automática rápida (después de 500ms)
+4. **Presiona ENTER** nuevamente para confirmar y guardar
+
+### Tiempos de Respuesta
+
+- **Anti-rebote:** 50ms (evita lecturas múltiples)
+- **Delay antes de repetición:** 500ms
+- **Tasa de repetición:** 100ms (10 cambios por segundo)
+- **Throttle de navegación:** 200ms entre movimientos
 
 1. Navegar hasta el parámetro deseado
 2. Presionar botón para entrar en modo edición

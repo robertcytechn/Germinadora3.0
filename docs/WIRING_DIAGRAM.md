@@ -28,6 +28,9 @@
 ### Comunicación
 - 1x Módulo CH375B USB Host
 
+### Interfaz de Usuario
+- 3x Botones pulsadores (Arriba, Abajo, Enter)
+
 ### Varios
 - Cables Dupont macho-hembra
 - Resistencias 220Ω (para LEDs de estado)
@@ -46,9 +49,9 @@
    DIGITAL PWM ~    ║                                        ║    DIGITAL
                     ║  [0] RX0 ←                    → 22 []  ║
                     ║  [1] TX0 ←                    → 23 []  ║
-   DHT Superior  → [2] INT0                          24 []  ║
-   DHT Inferior  → [3] INT1 PWM ~                    25 []  ║
-   DHT Puerta    → [4]                               26 []  ║
+   DHT Superior  → [2] INT0                   24 [] ← BTN Arriba
+   DHT Inferior  → [3] INT1 PWM ~             25 [] ← BTN Abajo
+   DHT Puerta    → [4]                        26 [] ← BTN Enter
    Ventil. Ext.  → [5] PWM ~                         27 []  ║
    Luces Blancas → [6] PWM ~                         28 []  ║
    Calefactora   → [7]                               29 []  ║
@@ -115,6 +118,22 @@
 | TXD    | 19 (RX1)     | Serial1                  |
 | RXD    | 18 (TX1)     | Serial1                  |
 | INT#   | 12           | Interrupción             |
+
+### Botones de Navegación del Menú
+
+| Botón        | Terminal 1   | Terminal 2 | Notas                         |
+|--------------|--------------|------------|-------------------------------|
+| ARRIBA       | 24           | GND        | INPUT_PULLUP activado         |
+| ABAJO        | 25           | GND        | INPUT_PULLUP activado         |
+| ENTER/SELECT | 26           | GND        | INPUT_PULLUP activado         |
+
+**Configuración:**
+- No se requieren resistencias pull-up externas
+- Los pines están configurados como INPUT_PULLUP internamente
+- Botón presionado = LOW, Botón suelto = HIGH
+- Mantener ENTER presionado 2 segundos para activar el menú
+
+**Ver:** `docs/BUTTON_WIRING_GUIDE.md` para detalles completos
 
 ## ⚡ Conexiones de Potencia (Actuadores)
 
