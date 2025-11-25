@@ -18,10 +18,7 @@
 #include <CONTROL_HUMEDAD.h>
 #include <ALARMAS.h>
 #include <PANTALLA.h>
-#include <USB_LOGGING.h>
-
-// #include <CH375.h>  // Descomentar cuando se conecte el CH375B físicamente
-// #include <MENU.h>   // Descomentar cuando se conecte botones de navegación físicamente
+#include <MENU_ENCODER.h>   // Sistema de menú con encoder rotatorio
 
 // =================================================================
 //  OBJETOS GLOBALES
@@ -34,8 +31,8 @@ Adafruit_SSD1306 display(OLED_WIDTH, OLED_HEIGHT, &Wire, OLED_ADDR);
 
 // CH375 usbHost(Serial1, CH375_INT_PIN); // Descomentar cuando se conecte el CH375B
 
-// Sistema de Menú Interactivo (Descomentar cuando se conecten botones de navegación)
-// MenuSystem menu(&display);
+// Sistema de Menú Interactivo con Encoder Rotatorio
+MenuSystemEncoder menu(&display);
 
 // =================================================================
 //  DEFINICIÓN DE VARIABLES GLOBALES (declaradas en VARS.h)
@@ -70,7 +67,7 @@ const unsigned long T_EXT_RAFAGA = 5 * 60000UL;
 const unsigned long T_EXT_DESCANSO = 5 * 60000UL;
 
 // PWM
-const int PWM_EXT_BASAL = 38;
+const int PWM_EXT_BASAL = 20;
 const int PWM_EXT_RAFAGA = 153;
 const int PWM_EXT_OFF = 0;
 
@@ -98,10 +95,6 @@ const unsigned long MAX_TIEMPO_CALEFACCION = 10 * 60000UL;
 bool alarmaActiva = false;
 byte codigoAlarma = 0;
 
-// Logging USB
-unsigned long ultimoLogging = 0;
-bool usbConectado = false;
-unsigned long registrosGuardados = 0;
 
 // =================================================================
 //  PROTOTIPOS DE FUNCIONES
@@ -134,15 +127,12 @@ void setup() {
 
     // Inicializar temporizadores para el loop principal
     inicioCicloExt = millis();
-    ultimoLogging = millis();
     
-    // TODO: Descomentar cuando se conecte CH375B físicamente
-    // inicializarUSB();
-    
-    // TODO: Descomentar cuando se conecte Joystick ARD-358 físicamente
-    // menu.inicializar();
+    // Inicializar sistema de menú con encoder rotatorio
+    menu.inicializar();
     
     Serial.println(F("Sistema iniciado correctamente."));
+    Serial.println(F("Presiona el encoder 2 segundos para activar el menu"));
     Serial.println(F("Configuracion: Drosera capensis"));
     Serial.print(F("Temp Dia: ")); Serial.print(tempDia); Serial.println(F("C"));
     Serial.print(F("Temp Noche: ")); Serial.print(tempNoche); Serial.println(F("C"));
@@ -287,9 +277,8 @@ void testPerifericos() {
 void loop() {
     // Loop principal - SIN DELAYS (totalmente no bloqueante)
     
-    // TODO: Descomentar cuando se conecten botones de navegación
-    // Actualizar sistema de menú (detecta activación y navegación)
-    // menu.actualizar();
+    // Actualizar sistema de menú con encoder (detecta activación y navegación)
+    menu.actualizar();
     
     leerTemperaturaHumedad();      // Actualiza solo si ha pasado el tiempo definido
     controlLuces();                 // Control de iluminación diurna/nocturna
@@ -301,7 +290,6 @@ void loop() {
     
     // TODO: Descomentar cuando se conecten los dispositivos físicos
     // controlHumedad();            // Control de humidificador/nebulizador
-    // guardarDatosUSB();           // Logging cada 30 minutos en USB
     
     // Sin delay - el loop se ejecuta continuamente
     // Cada función controla su propia temporización con millis()

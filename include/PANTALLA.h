@@ -6,6 +6,7 @@
 #include <RTClib.h>
 #include <VARS.h>
 #include <PINS.h>
+#include <MENU_ENCODER.h>
 
 // =================================================================
 //  VISUALIZACIÓN EN PANTALLA OLED
@@ -14,16 +15,16 @@
 // Objetos externos (declarados en main.cpp)
 extern Adafruit_SSD1306 display;
 extern RTC_DS1307 reloj;
+extern MenuSystemEncoder menu;
 
 void mostrarPantalla(){
     static unsigned long ultimaActualizacion = 0;
     
-    // TODO: Descomentar cuando se conecte Joystick ARD-358
-    // Si el menú está activo, no mostrar la pantalla principal
-    // if (menu.estaActivo()) {
-    //     menu.mostrar();
-    //     return;
-    // }
+    // Si el menú está activo, mostrar solo el menú
+    if (menu.estaActivo()) {
+        menu.mostrar();
+        return;
+    }
     
     // Actualizar pantalla solo cada TIEMPO_ACTUALIZACION_PANTALLA (no bloqueante)
     if (millis() - ultimaActualizacion < TIEMPO_ACTUALIZACION_PANTALLA) return;
