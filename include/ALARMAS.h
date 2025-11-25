@@ -9,6 +9,10 @@
 //  SISTEMA DE ALARMAS Y SEGURIDAD
 // =================================================================
 
+// Declaraciones adelantadas (forward declarations)
+void activarAlarma(byte codigo);
+void desactivarAlarma();
+
 void verificarAlarmas() {
     // Verificar temperaturas fuera de rango
     if (tempPromedio > tempMaxSeguridad) {
